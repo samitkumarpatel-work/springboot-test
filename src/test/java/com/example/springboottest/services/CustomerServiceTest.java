@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class CustomerServiceTest {
-    
+
     @MockBean
     private CustomerRepository customerRepository;
 
