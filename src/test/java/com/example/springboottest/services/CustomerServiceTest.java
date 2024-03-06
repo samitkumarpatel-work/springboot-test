@@ -6,6 +6,7 @@ import com.example.springboottest.repositories.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
@@ -54,7 +55,13 @@ public class CustomerServiceTest {
                     assert customer.getOrder().deliveredDate() == null;
                     assert customer.getOrder().items().equals(List.of("item1", "item2"));
                 })
+                .then(() -> {
+                    Mockito.verify(customerRepository, Mockito.times(1)).findById(1L);
+                    Mockito.verify(orderService, Mockito.times(1)).fetchCustomerOrder(1L);
+                })
                 .verifyComplete();
+
+
 
     }
 
