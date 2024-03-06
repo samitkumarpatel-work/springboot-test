@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: springboot-test
+    messages:
+      basicGreetMessage: Hello, There!
+    order-service:
+      host: http://localhost:9090
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/springboot-test
+    username: postgres
+    password: postgres
+
+
