@@ -71,6 +71,13 @@
 			<artifactId>r2dbc</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--wiremock https://cloud.spring.io/spring-cloud-contract/2.1.x/multi/multi__spring_cloud_contract_wiremock.html-->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-contract-wiremock</artifactId>
+			<version>4.1.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

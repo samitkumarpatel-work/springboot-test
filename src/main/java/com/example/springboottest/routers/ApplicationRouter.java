@@ -20,7 +20,7 @@ public class ApplicationRouter {
                 )
                 .path("/customer", customerBuilder -> customerBuilder
                         .GET("", request -> ServerResponse.noContent().build())
-                        .POST("", request -> ServerResponse.noContent().build())
+                        .POST("", customerHandler::saveCustomer)
                         .GET("/{id}", customerHandler::customerById)
                         .PUT("/{id}", request -> ServerResponse.noContent().build())
                         .DELETE("/{id}", request -> ServerResponse.noContent().build())

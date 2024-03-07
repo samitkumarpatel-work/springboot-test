@@ -1,5 +1,6 @@
 package com.example.springboottest.handlers;
 
+import com.example.springboottest.models.Customer;
 import com.example.springboottest.services.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,5 +19,11 @@ public class CustomerHandler {
         return customerService.fetchCustomer(id)
                 .flatMap(ServerResponse.ok()::bodyValue)
                 .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> saveCustomer(ServerRequest request) {
+        return request.bodyToMono(Customer.class)
+                .flatMap(customerService::saveCustomer)
+                .flatMap(ServerResponse.ok()::bodyValue);
     }
 }
