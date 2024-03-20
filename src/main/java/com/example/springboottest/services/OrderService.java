@@ -15,7 +15,9 @@ public class OrderService {
 
     public Mono<Order> fetchCustomerOrder(Long id) {
         log.info("OrderService::fetchCustomerOrder: {}", id);
-        return orderHttpClient.getOrder(id);
+        return orderHttpClient
+                .getOrder(id)
+                .retry(3);
     }
 
 }

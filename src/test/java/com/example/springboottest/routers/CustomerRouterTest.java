@@ -1,10 +1,15 @@
 package com.example.springboottest.routers;
 
+import com.example.springboottest.kafka.KafkaPubSubConfiguration;
+import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -18,8 +23,11 @@ import org.testcontainers.utility.DockerImageName;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -39,6 +47,9 @@ public class CustomerRouterTest {
     static void applicationProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.application.order-service.host", () -> "http://localhost:${wiremock.server.port}");
     }
+
+    @MockBean
+    KafkaPubSubConfiguration kafkaPubSubConfiguration;
 
     @BeforeEach
     void setUp() {
@@ -87,6 +98,65 @@ public class CustomerRouterTest {
                         }
                 """);
 
+    }
+
+    @Test
+    @DisplayName("Order service retry test")
+    void orderServiceRetryTest(@Autowired WebTestClient webTestClient) {
+        //https://wiremock.org/docs/stateful-behaviour/
+
+        // 1st attempt
+        stubFor(get(urlPathEqualTo("/order/1"))
+                .inScenario("retryTest")
+                .whenScenarioStateIs(Scenario.STARTED)
+                .willReturn(aResponse().withStatus(500))
+                .willSetStateTo("serviceCallFailed"));
+
+        // 2nd attempt
+        stubFor(get(urlPathEqualTo("/order/1"))
+                .inScenario("retryTest")
+                .whenScenarioStateIs("serviceCallFailed")
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("""
+                                    {
+                                        "id": 1,
+                                        "placedAt": "2021-08-01",
+                                        "expectedDeliveryDate": "2021-08-04",
+                                        "deliveredDate": null,
+                                        "items": ["item1"]
+                                    }
+                                """)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
+
+        webTestClient
+                .get()
+                .uri("/customer/{id}", 1)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.order.id").isEqualTo(1)
+                .json("""
+                        {
+                            "id":1,
+                            "firstName":"John",
+                            "lastName":"Doe",
+                            "age":30,
+                            "dateOfBirth":"1990-01-01",
+                            "order":{
+                                "id":1,
+                                "placedAt":"2021-08-01",
+                                "expectedDeliveryDate":"2021-08-04",
+                                "deliveredDate":null,
+                                "items":["item1"]
+                            },
+                            "isActive":true
+                        }
+                """);
+
+        verify(2, getRequestedFor(urlEqualTo("/order/1")));
     }
 
 }
