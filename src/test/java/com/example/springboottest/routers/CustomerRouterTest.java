@@ -15,7 +15,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -39,7 +42,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Testcontainers
 @AutoConfigureWebTestClient
 @AutoConfigureWireMock(port = 0)
-@WithMockUser
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CustomerRouterTest {
 
@@ -79,6 +81,7 @@ public class CustomerRouterTest {
     @Test
     @DisplayName("Order service retry test")
     @Order(1)
+    @WithMockUser
     void orderServiceRetryTest(@Autowired WebTestClient webTestClient) {
         //https://wiremock.org/docs/stateful-behaviour/
 
@@ -138,6 +141,7 @@ public class CustomerRouterTest {
 
     @Test
     @Order(2)
+    @WithMockUser
     void employeeRouterTest(@Autowired WebTestClient webTestClient) {
         webTestClient
                 .get()
@@ -168,6 +172,58 @@ public class CustomerRouterTest {
 
     }
 
+    @Test
+    @Order(3)
+    @WithMockUser(roles = "ADMIN")
+    //or
+    //webTestClient.mutateWith(SecurityMockServerConfigurers.mockJwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))).post()...
+    void saveCustomerRouterTest(@Autowired WebTestClient webTestClient) {
+        webTestClient
+                //.mutateWith(SecurityMockServerConfigurers.mockJwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                .post()
+                .uri("/customer")
+                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .bodyValue("""
+                        {
+                            "firstName":"John",
+                            "lastName":"Doe",
+                            "age":30,
+                            "dateOfBirth":"1990-01-01",
+                            "isActive":true
+                        }
+                """)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.id").isNotEmpty()
+                .jsonPath("$.firstName").isEqualTo("John")
+                .jsonPath("$.lastName").isEqualTo("Doe")
+                .jsonPath("$.age").isEqualTo(30)
+                .jsonPath("$.dateOfBirth").isEqualTo("1990-01-01")
+                .jsonPath("$.isActive").isEqualTo(true);
+    }
 
-
+    @Test
+    @Order(3)
+    @WithMockUser(roles = "USER")
+    void saveCustomerRouterTest01(@Autowired WebTestClient webTestClient) {
+        webTestClient
+                //.mutateWith(SecurityMockServerConfigurers.mockJwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                .post()
+                .uri("/customer")
+                .header(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .bodyValue("""
+                        {
+                            "firstName":"John",
+                            "lastName":"Doe",
+                            "age":30,
+                            "dateOfBirth":"1990-01-01",
+                            "isActive":true
+                        }
+                """)
+                .exchange()
+                .expectStatus()
+                .isForbidden();
+    }
 }

@@ -1,9 +1,9 @@
 spring:
   security:
     oauth2:
-      authorizationserver:
-        endpoint:
-          jwk-set-uri: ${jwk-set-uri:http://localhost:8080/oauth2/keys}
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:3000/oauth2/jwks}
   application:
     name: springboot-test
     messages:

@@ -3,6 +3,7 @@ package com.example.springboottest.handlers;
 import com.example.springboottest.models.Customer;
 import com.example.springboottest.services.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -21,6 +22,7 @@ public class CustomerHandler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public Mono<ServerResponse> saveCustomer(ServerRequest request) {
         return request.bodyToMono(Customer.class)
                 .flatMap(customerService::saveCustomer)
