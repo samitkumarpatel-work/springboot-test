@@ -1,9 +1,12 @@
 package com.example.springboottest.routers;
 
+import com.example.springboottest.kafka.KafkaPubSubConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -11,7 +14,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @SpringBootTest
 //@SpringBootTest(properties = {"spring.application.messages.basicGreetMessage=from-springboot-test"})
 @AutoConfigureWebTestClient
+@WithMockUser
 public class MessageRouterTest {
+    @MockBean
+    KafkaPubSubConfiguration kafkaPubSubConfiguration;
 
     @Autowired
     // https://docs.spring.io/spring-framework/reference/testing/webtestclient.html

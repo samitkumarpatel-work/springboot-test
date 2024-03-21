@@ -1,9 +1,11 @@
 package com.example.springboottest;
 
+import com.example.springboottest.kafka.KafkaPubSubConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -14,6 +16,9 @@ import org.testcontainers.utility.DockerImageName;
 @SpringBootTest
 @Testcontainers
 class SpringbootTestApplicationTests {
+
+	@MockBean
+	KafkaPubSubConfiguration kafkaPubSubConfiguration;
 
 	@Container
 	@ServiceConnection

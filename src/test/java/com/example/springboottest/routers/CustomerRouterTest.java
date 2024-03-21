@@ -4,14 +4,18 @@ import com.example.springboottest.kafka.KafkaPubSubConfiguration;
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -35,6 +39,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Testcontainers
 @AutoConfigureWebTestClient
 @AutoConfigureWireMock(port = 0)
+@WithMockUser
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CustomerRouterTest {
 
     @Container
@@ -69,39 +75,10 @@ public class CustomerRouterTest {
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 
-    @Test
-    void employeeRouterTest(@Autowired WebTestClient webTestClient) {
-        webTestClient
-                .get()
-                .uri("/customer/{id}", 1)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody()
-                .jsonPath("$.id").isEqualTo(1)
-                .jsonPath("$.order.id").isEqualTo(1)
-                .json("""
-                        {
-                            "id":1,
-                            "firstName":"John",
-                            "lastName":"Doe",
-                            "age":30,
-                            "dateOfBirth":"1990-01-01",
-                            "order":{
-                                "id":1,
-                                "placedAt":"2021-08-01",
-                                "expectedDeliveryDate":"2021-08-04",
-                                "deliveredDate":null,
-                                "items":["item1","item2"]
-                            },
-                            "isActive":true
-                        }
-                """);
-
-    }
 
     @Test
     @DisplayName("Order service retry test")
+    @Order(1)
     void orderServiceRetryTest(@Autowired WebTestClient webTestClient) {
         //https://wiremock.org/docs/stateful-behaviour/
 
@@ -158,5 +135,39 @@ public class CustomerRouterTest {
 
         verify(2, getRequestedFor(urlEqualTo("/order/1")));
     }
+
+    @Test
+    @Order(2)
+    void employeeRouterTest(@Autowired WebTestClient webTestClient) {
+        webTestClient
+                .get()
+                .uri("/customer/{id}", 1)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.order.id").isEqualTo(1)
+                .json("""
+                        {
+                            "id":1,
+                            "firstName":"John",
+                            "lastName":"Doe",
+                            "age":30,
+                            "dateOfBirth":"1990-01-01",
+                            "order":{
+                                "id":1,
+                                "placedAt":"2021-08-01",
+                                "expectedDeliveryDate":"2021-08-04",
+                                "deliveredDate":null,
+                                "items":["item1","item2"]
+                            },
+                            "isActive":true
+                        }
+                """);
+
+    }
+
+
 
 }
