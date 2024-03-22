@@ -1,4 +1,4 @@
-package com.example.springboottest.orderservice;
+package com.example.springboottest.clients.orderservice;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.example.springboottest.services;
 
-import com.example.springboottest.orderservice.Order;
-import com.example.springboottest.orderservice.OrderHttpClient;
+import com.example.springboottest.clients.orderservice.Order;
+import com.example.springboottest.clients.orderservice.OrderHttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

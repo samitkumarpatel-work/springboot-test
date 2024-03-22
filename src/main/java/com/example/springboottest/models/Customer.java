@@ -1,6 +1,6 @@
 package com.example.springboottest.models;
 
-import com.example.springboottest.orderservice.Order;
+import com.example.springboottest.clients.orderservice.Order;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

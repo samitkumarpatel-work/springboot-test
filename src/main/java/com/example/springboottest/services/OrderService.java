@@ -1,7 +1,7 @@
 package com.example.springboottest.services;
 
-import com.example.springboottest.orderservice.OrderHttpClient;
-import com.example.springboottest.orderservice.Order;
+import com.example.springboottest.clients.orderservice.OrderHttpClient;
+import com.example.springboottest.clients.orderservice.Order;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,6 @@
 spring:
+  kafka:
+
   security:
     oauth2:
       resourceserver:

@@ -1,4 +1,4 @@
-package com.example.springboottest.orderservice;
+package com.example.springboottest.clients.orderservice;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;

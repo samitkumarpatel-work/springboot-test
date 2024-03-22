@@ -13,7 +13,7 @@ import reactor.kafka.sender.SenderOptions;
 import java.util.Collections;
 import java.util.Map;
 
-@Configuration
+//@Configuration
 public class KafkaPubSubConfiguration<K,V> {
 
     @Value("${spring.kafka.bootstrap-servers}")
