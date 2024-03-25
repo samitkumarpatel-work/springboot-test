@@ -1,9 +1,7 @@
 package com.example.springboottest;
 
-import com.example.springboottest.kafka.KafkaPubSubConfiguration;
+import com.example.springboottest.config.KafkaPubSubConfiguration;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

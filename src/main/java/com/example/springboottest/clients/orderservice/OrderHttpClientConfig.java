@@ -31,4 +31,5 @@ public class OrderHttpClientConfig {
         HttpServiceProxyFactory factory = HttpServiceProxyFactory.builderFor(adapter).build();
         return factory.createClient(OrderHttpClient.class);
     }
+
 }

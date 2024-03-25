@@ -12,7 +12,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @Configuration
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-public class SecurityConfig {
+public class SecurityConfiguration {
     @Bean
     @SneakyThrows
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {

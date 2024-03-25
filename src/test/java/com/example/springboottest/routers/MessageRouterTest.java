@@ -1,6 +1,6 @@
 package com.example.springboottest.routers;
 
-import com.example.springboottest.kafka.KafkaPubSubConfiguration;
+import com.example.springboottest.config.KafkaPubSubConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;

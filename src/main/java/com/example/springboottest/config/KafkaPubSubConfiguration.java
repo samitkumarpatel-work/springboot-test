@@ -1,4 +1,4 @@
-package com.example.springboottest.kafka;
+package com.example.springboottest.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -13,7 +13,7 @@ import reactor.kafka.sender.SenderOptions;
 import java.util.Collections;
 import java.util.Map;
 
-//@Configuration
+@Configuration
 public class KafkaPubSubConfiguration<K,V> {
 
     @Value("${spring.kafka.bootstrap-servers}")
