@@ -1,6 +1,8 @@
 package com.example.springboottest.kafka;
 
 import com.example.springboottest.config.KafkaPubSubConfiguration;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +19,12 @@ import reactor.core.publisher.Mono;
 import reactor.kafka.receiver.KafkaReceiver;
 import reactor.kafka.sender.KafkaSender;
 import reactor.kafka.sender.SenderRecord;
+import reactor.test.StepVerifier;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -35,11 +43,11 @@ public class KafkaPubSubTest extends KafkaPubSubConfiguration<Integer, String> {
     @DynamicPropertySource
     static void kafkaProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-        registry.add("spring.kafka.producer.key-serializer", () -> "org.apache.kafka.common.serialization.StringSerializer");
+        registry.add("spring.kafka.producer.key-serializer", () -> "org.apache.kafka.common.serialization.IntegerSerializer");
         registry.add("spring.kafka.producer.value-serializer", () -> "org.apache.kafka.common.serialization.StringSerializer");
 
         registry.add("spring.kafka.consumer.topic", () -> TOPIC);
-        registry.add("spring.kafka.consumer.key-deserializer", () -> "org.apache.kafka.common.serialization.StringDeserializer");
+        registry.add("spring.kafka.consumer.key-deserializer", () -> "org.apache.kafka.common.serialization.IntegerDeserializer");
         registry.add("spring.kafka.consumer.value-deserializer", () -> "org.apache.kafka.common.serialization.StringDeserializer");
     }
 
@@ -57,17 +65,52 @@ public class KafkaPubSubTest extends KafkaPubSubConfiguration<Integer, String> {
                 () -> {
                     var messages = Flux.<SenderRecord<Integer, String, Integer>>just(
                             SenderRecord.create(TOPIC, 0, System.currentTimeMillis(), 1, "One", 1),
-                            SenderRecord.create(TOPIC, 0, System.currentTimeMillis(), 2, "Two", 2),
-                            SenderRecord.create(TOPIC, 0, System.currentTimeMillis(), 3, "Three", 3)
-                            );
+                            SenderRecord.create(new ProducerRecord<>(TOPIC, 0, 2, "Two"), 1)
+                    );
 
-                    kafkaSender.send(Mono.just(SenderRecord.create(TOPIC, 0, System.currentTimeMillis(), 1, "One", 1)))
-                            .doOnError(System.err::println)
-                            .doOnNext(r -> System.out.printf("Message : " + r.correlationMetadata() + " send response: "  + r.recordMetadata()))
-                            .subscribe();
+                    /*kafkaSender.<Integer>send(messages)
+                            .doOnError(e -> System.err.println("Send failed "+e))
+                            .subscribe(r -> {
+                                RecordMetadata metadata = r.recordMetadata();
+                                Instant timestamp = Instant.ofEpochMilli(metadata.timestamp());
+                                System.out.printf("Message %d sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
+                                        r.correlationMetadata(),
+                                        metadata.topic(),
+                                        metadata.partition(),
+                                        metadata.offset(),
+                                        LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                            });*/
 
+                    StepVerifier.create(
+                            kafkaSender.<Integer>send(messages)
+                                    .doOnError(e -> System.err.println("Send failed "+e))
+                                    .doOnNext(r -> {
+                                        RecordMetadata metadata = r.recordMetadata();
+                                        Instant timestamp = Instant.ofEpochMilli(metadata.timestamp());
+                                        System.out.printf("Message %d sent successfully, topic-partition=%s-%d offset=%d timestamp=%s\n",
+                                                r.correlationMetadata(),
+                                                metadata.topic(),
+                                                metadata.partition(),
+                                                metadata.offset(),
+                                                LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+                                    }))
+                            .expectNextCount(2)
+                            .verifyComplete();
+
+                    // Wait for the message to be sent & processed
+                    Thread.sleep(1000);
+                    kafkaSender.close();
+
+                    StepVerifier.create(kafkaReceiver.receive())
+                            .assertNext(r -> {
+                                System.out.println("Message received " + r.key() +" "+ r.value());
+                            })
+                            .assertNext(r -> {
+                                System.out.println("Message received " + r.key() +" "+ r.value());
+                            })
+                            .thenCancel()
+                            .verify(Duration.ofSeconds(10));
                 }
-
         );
     }
 

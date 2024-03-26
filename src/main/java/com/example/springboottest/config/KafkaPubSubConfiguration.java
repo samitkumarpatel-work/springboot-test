@@ -38,6 +38,8 @@ public class KafkaPubSubConfiguration<K,V> {
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer,
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer,
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer
+                //ProducerConfig.CLIENT_ID_CONFIG, "sample-producer",
+                //ProducerConfig.ACKS_CONFIG, "all"
         );
         SenderOptions<K,V> senderOptions =
                 SenderOptions.<K,V>create(senderProperties)
