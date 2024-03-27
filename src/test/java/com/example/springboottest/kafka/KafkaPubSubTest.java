@@ -101,15 +101,19 @@ public class KafkaPubSubTest extends KafkaPubSubConfiguration<Integer, String> {
                     Thread.sleep(1000);
                     kafkaSender.close();
 
+                    //consumer-1
                     StepVerifier.create(kafkaReceiver.receive())
                             .assertNext(r -> {
                                 System.out.println("Message received " + r.key() +" "+ r.value());
+                                //r.receiverOffset().acknowledge();
                             })
                             .assertNext(r -> {
                                 System.out.println("Message received " + r.key() +" "+ r.value());
+                                //r.receiverOffset().acknowledge();
                             })
                             .thenCancel()
                             .verify(Duration.ofSeconds(10));
+
                 }
         );
     }
