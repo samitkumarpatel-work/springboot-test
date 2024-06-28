@@ -37,7 +37,13 @@ public class CustomerServiceTest {
 
         when(customerRepository.findById(anyLong())).thenReturn(Mono.just(customer));
         when(orderService.fetchCustomerOrder(anyLong())).thenReturn(Mono.just(order));
-
+        
+        /*
+        //If a private field to be set with some value It can be done in this Reflection way
+        import org.springframework.test.util.ReflectionTestUtils;
+        ReflectionTestUtils.setField(customerService, "privatePublicFileName", "value");
+        */
+        
         customerService = new CustomerService(customerRepository, orderService);
     }
 
