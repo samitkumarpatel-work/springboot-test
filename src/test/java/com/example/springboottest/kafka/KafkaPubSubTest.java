@@ -31,6 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Testcontainers
 @SpringBootTest
+/**
+    Similar Pub-Sub Test can be seen here - https://github.com/samitkumarpatel/kafka-producer-consumer-unitest/blob/main/src/test/java/net/samitkumar/kafka_poc/KafkaProducerConsumerApplicationTests.java
+*/
 public class KafkaPubSubTest extends KafkaPubSubConfiguration<Integer, String> {
 
     @Container
