@@ -18,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -51,9 +52,11 @@ public class CustomerRouterTest {
     @DynamicPropertySource
     static void applicationProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.application.order-service.host", () -> "http://localhost:${wiremock.server.port}");
+        registry.add("spring.application.metadata.url", () -> "http://localhost:${wiremock.server.port}");
+        registry.add("spring.application.metadata.uri", () -> "/metadata");
     }
 
-    @MockBean
+    @MockitoBean
     KafkaPubSubConfiguration kafkaPubSubConfiguration;
 
     @BeforeEach
@@ -222,5 +225,27 @@ public class CustomerRouterTest {
                 .exchange()
                 .expectStatus()
                 .isForbidden();
+    }
+
+    @Test
+    @Order(4)
+    @WithMockUser
+    void metadataRouterTest(@Autowired WebTestClient webTestClient) {
+        stubFor(get(urlPathEqualTo("/metadata"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Custom-Header", "Custom-Value")
+                        .withHeader(HttpHeaders.SET_COOKIE, "cookie1=value1;Path=/;HttpOnly","cookie2=value2;Path=/;HttpOnly")
+                )
+        );
+
+        webTestClient
+                .get()
+                .uri("/metadata")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .json("");
     }
 }

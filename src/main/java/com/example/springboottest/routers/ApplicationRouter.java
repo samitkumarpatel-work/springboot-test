@@ -2,6 +2,7 @@ package com.example.springboottest.routers;
 
 import com.example.springboottest.handlers.CustomerHandler;
 import com.example.springboottest.handlers.MessageHandler;
+import com.example.springboottest.handlers.MetadataHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -12,9 +13,10 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 public class ApplicationRouter {
 
     @Bean
-    RouterFunction<ServerResponse> routerFunction(MessageHandler messageHandlers, CustomerHandler customerHandler) {
+    RouterFunction<ServerResponse> routerFunction(MessageHandler messageHandlers, CustomerHandler customerHandler, MetadataHandler metadataHandler) {
         return RouterFunctions
                 .route()
+                .GET("/metadata", metadataHandler::apiMetadata)
                 .path("/message", messageBuilder -> messageBuilder
                         .GET("", messageHandlers::greet)
                 )
